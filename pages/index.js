@@ -1,30 +1,41 @@
-import { useState } from 'react';
+import React from 'react';
 import Head from 'next/head';
 
-import Fuse from 'fuse.js';
-import _ from 'lodash';
-
 import styles from '../styles/Home.module.css';
-import CodeSampleModal from '../components/CodeSampleModal';
 
-export default function Start({ players }) {
-  const [results, setResults] = useState(players);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function Start() {
+  const [results, setResults] = React.useState([]);
 
-  const fuse = new Fuse(players, {
-    keys: ['name'],
-    threshold: 0.3,
-  });
+  const getPlayers = async (query="") => {
+    const url = 'https://www.balldontlie.io/api/v1/players?search=';
+    const response = await fetch(url + query);
+    let players = await response.json();
+    players = players.data;
 
-  const handleModal = () => {
-    console.log("clicked modal button")
-    setIsModalOpen(true);
+    players = players.map((player) => {
+        return {
+          id: player.id,
+          first_name: player.first_name,
+          last_name: player.last_name,
+          height_feet: player.height_feet,
+          height_inches: player.height_inches,
+          position: player.position,
+          weight_pounds: player.weight_pounds
+          // team: [Object],
+        }
+    });
+
+    setResults(players);
   }
+
+  React.useEffect(() => {
+    getPlayers();
+  }, []);
 
   return (
     <div>
       <Head>
-        <title>Core Web Vitals</title>
+        <title>Fantasy Points Predictor</title>
         <meta name="description" content="Core web vitals walk through" />
         <link rel="icon" href="/favicon.ico" />
         <link
@@ -40,23 +51,7 @@ export default function Start({ players }) {
             type="text"
             placeholder="player search..."
             className={styles.input}
-            onChange={async (e) => {
-              const { value } = e.currentTarget;
-
-              const searchResult = fuse
-                .search(value)
-                .map((result) => result.item);
-
-              const updatedResults = searchResult.length
-                ? searchResult
-                : players;
-              setResults(updatedResults);
-
-              // Fake analytics hit
-              console.info({
-                searchedAt: _.now(),
-              });
-            }}
+            onChange={event => getPlayers(event.target.value) }
           />
 
           <ul className={styles.players}>
@@ -65,45 +60,12 @@ export default function Start({ players }) {
                 <p>{player.first_name} {player.last_name}</p>
                 <p>{player.position}</p>
                 <p>{player.height_feet}' {player.height_inches}"</p>
+                {/* <p>{JSON.stringify(player.seasonData)}</p> */}
               </li>
             ))}
           </ul>
         </div>
-
-        <div className={styles.codeSampleBlock}>
-          <h2 className={styles.secondaryHeading}>Code Sample</h2>
-          <p>Ever wondered how to write a function that prints Hello World?</p>
-
-          <button onClick={handleModal}>Show Me</button>
-          <CodeSampleModal
-            isOpen={isModalOpen}
-            closeModal={() => setIsModalOpen(false)}
-          />
-        </div>
       </main>
     </div>
   );
-}
-
-export async function getServerSideProps() {
-  const response = await fetch('https://www.balldontlie.io/api/v1/players');
-  let players = await response.json();
-  players = players.data
-
-  return {
-    props: {
-      players: players.map((player) => (
-        {
-          id: player.id,
-          first_name: player.first_name,
-          height_feet: player.height_feet,
-          height_inches: player.height_inches,
-          last_name: player.last_name,
-          position: player.position,
-          weight_pounds: player.weight_pounds
-          // team: [Object],
-        }
-      ))
-    }
-  };
 }
