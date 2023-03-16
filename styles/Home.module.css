@@ -78,6 +78,10 @@
   align-items: center;
 }
 
+.tableCell {
+  border: 1px black solid;
+}
+
 @media (min-width: 800px) {
   .countries {
     grid-template-columns: 1fr 1fr;
