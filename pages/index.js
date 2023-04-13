@@ -3,7 +3,8 @@ import Head from 'next/head';
 
 import styles from '../styles/Home.module.css';
 
-const KEYS = ['pts', 'reb', 'ast', 'stl', 'blk', 'turnover', 'min', 'games_played', 'fgm', 'fga', 'fg_pct', 'fg3m', 'fg3a', 'fg3_pct', 'ftm', 'fta', 'ft_pct','oreb', 'dreb', 'pf'];
+const KEYS = ['pts', 'reb', 'ast', 'stl', 'blk', 'turnover'];
+const SECONDARY_KEYS = ['min', 'games_played', 'fgm', 'fga', 'fg_pct', 'fg3m', 'fg3a', 'fg3_pct', 'ftm', 'fta', 'ft_pct','oreb', 'dreb', 'pf'];
 
 export default function Start() {
   const [results, setResults] = React.useState([]);
@@ -31,7 +32,9 @@ export default function Start() {
     let seasonData = await getSeasonData(players, "2022");
 
     // Match the player to their season data using player_id and id
-    players = players.map((player) => {
+    let activePlayers = [];  // players that have season data
+
+    players.forEach(player => {
       let season_data = {}
       for (let playerSeason of seasonData) {
         if (player.id === playerSeason.player_id) {
@@ -39,20 +42,23 @@ export default function Start() {
         }
       }
 
-      return {
-        id: player.id,
-        first_name: player.first_name,
-        last_name: player.last_name,
-        height_feet: player.height_feet,
-        height_inches: player.height_inches,
-        position: player.position,
-        weight_pounds: player.weight_pounds,
-        season_data: season_data
-        // team: [Object],
+      // If no season data, don't return data for that player
+      if (season_data !== {} && season_data['games_played'] > 0) {
+        activePlayers.push({
+          id: player.id,
+          first_name: player.first_name,
+          last_name: player.last_name,
+          height_feet: player.height_feet,
+          height_inches: player.height_inches,
+          position: player.position,
+          weight_pounds: player.weight_pounds,
+          season_data: season_data
+          // team: [Object],
+        });
       }
     });
 
-    setResults(players);
+    setResults(activePlayers);
   }
 
   //  {"games_played":34,"player_id":34,"season":2018,
@@ -60,19 +66,38 @@ export default function Start() {
   // "fta":0.82,"oreb":0.35,"dreb":1.5,"reb":1.85,"ast":3.5,"stl":0.53,"blk":0.06,
   // "turnover":0.94,"pf":1.65,"pts":6.15,"fg_pct":0.357,"fg3_pct":0.296,"ft_pct":0.571}
   const generateSeasonTable = (playerSeasonData) => {
-    return (
-      <table>
-        <tr>
-          {KEYS.map(key => <th className={styles.tableCell}>{key}</th>)}  
-        </tr>
+    let fantasyPoints = getFantasyPoints(playerSeasonData);
 
-        <tr>
-          {KEYS.map(key => <td className={styles.tableCell}>{playerSeasonData[key]}</td>)}
-        </tr>
-      </table>
+    return (
+      <div>
+        <center>
+          <table>
+            <tr>{KEYS.map(key => <th className={styles.tableCell}>{key}</th>)}</tr>
+            <tr>{KEYS.map(key => <td className={styles.tableCell}>{playerSeasonData[key]}</td>)}</tr>
+          </table>
+        </center>
+
+        <p>Fantasy Points: {fantasyPoints.toFixed(1)}</p>
+
+        {/* <table>
+          <tr>
+            {SECONDARY_KEYS.map(key => <th className={styles.tableCell}>{key}</th>)}  
+          </tr>
+
+          <tr>
+            {SECONDARY_KEYS.map(key => <td className={styles.tableCell}>{playerSeasonData[key]}</td>)}
+          </tr>
+        </table> */}
+      </div>
     )
   }
 
+  const getFantasyPoints = (playerSeasonData) => {
+    let score = 0;
+    score += playerSeasonData["reb"] * 1.2 + playerSeasonData["pts"] + playerSeasonData["ast"] * 1.5 + playerSeasonData["stl"] * 3 + playerSeasonData["blk"] * 3 - playerSeasonData["turnover"];
+    return score;
+  }
+    
   React.useEffect(() => {
     getPlayers();
   }, []);
@@ -101,12 +126,12 @@ export default function Start() {
 
           <ul className={styles.players}>
             {results.map((player, i) => (
-              <li key={i} className={styles.player}>
-                <p>{player.first_name} {player.last_name}</p>
+              <div key={i} className={styles.playerCard}>
+                <p className={styles.boldedName}>{player.first_name} {player.last_name}</p>
                 <p>{player.position}</p>
                 <p>{player.height_feet}' {player.height_inches}"</p>
                 {generateSeasonTable(player.season_data)}
-              </li>
+              </div>
             ))}
           </ul>
         </div>
