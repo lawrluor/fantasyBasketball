@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import { getArticles } from '../nbaAPI';
 
 import styles from '../styles/Home.module.css';
 
@@ -97,9 +98,16 @@ export default function Start() {
     score += playerSeasonData["reb"] * 1.2 + playerSeasonData["pts"] + playerSeasonData["ast"] * 1.5 + playerSeasonData["stl"] * 3 + playerSeasonData["blk"] * 3 - playerSeasonData["turnover"];
     return score;
   }
-    
+  
+  // This function runs at the very beginning of the page load
   React.useEffect(() => {
-    getPlayers();
+    const asyncWrapper = async () => {
+      getPlayers();
+      let results = getArticles();
+      console.log(results);
+    }
+
+    asyncWrapper();
   }, []);
 
   return (
