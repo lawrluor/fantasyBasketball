@@ -132,7 +132,8 @@ const getArticles = async () => {
 
   for (const website of nbaWebsites) {
     const data = await getNbaData(website);
-    articles.push(...data);
+    console.log('data', data);
+    // articles.push(...data);
   }
 
   return articles;
