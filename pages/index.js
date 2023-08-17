@@ -1,6 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
-import { getArticles } from '../nbaAPI';
+import { getArticles } from '../nbaApi';
 
 import styles from '../styles/Home.module.css';
 
@@ -9,6 +9,7 @@ const SECONDARY_KEYS = ['min', 'games_played', 'fgm', 'fga', 'fg_pct', 'fg3m', '
 
 export default function Start() {
   const [results, setResults] = React.useState([]);
+  const [articles, setArticles] = React.useState([]);
 
   // {"data":[
   //  {"games_played":30,"player_id":32,"season":2018,"min":"16:46","fgm":2.0,"fga":4.73,"fg3m":0.43,"fg3a":1.73,"ftm":0.6,"fta":0.93,"oreb":0.53,"dreb":2.23,"reb":2.77,"ast":0.57,"stl":0.6,"blk":0.47,"turnover":0.47,"pf":0.97,"pts":5.03,"fg_pct":0.423,"fg3_pct":0.25,"ft_pct":0.643},
@@ -20,7 +21,7 @@ export default function Start() {
     // alert(url + playerIdsString);
     const response = await fetch(url + playerIdsString);
     let data = await response.json();
-    data = data.data; 
+    data = data.data;
     return data;
   }
 
@@ -82,7 +83,7 @@ export default function Start() {
 
         {/* <table>
           <tr>
-            {SECONDARY_KEYS.map(key => <th className={styles.tableCell}>{key}</th>)}  
+            {SECONDARY_KEYS.map(key => <th className={styles.tableCell}>{key}</th>)}
           </tr>
 
           <tr>
@@ -98,13 +99,13 @@ export default function Start() {
     score += playerSeasonData["reb"] * 1.2 + playerSeasonData["pts"] + playerSeasonData["ast"] * 1.5 + playerSeasonData["stl"] * 3 + playerSeasonData["blk"] * 3 - playerSeasonData["turnover"];
     return score;
   }
-  
-  // This function runs at the very beginning of the page load
+
+  // This function runs at the very beginning of every page load
   React.useEffect(() => {
     const asyncWrapper = async () => {
       getPlayers();
-      let results = getArticles();
-      console.log(results);
+      let data = await getArticles();
+      setArticles(data);
     }
 
     asyncWrapper();
@@ -139,6 +140,15 @@ export default function Start() {
                 <p>{player.position}</p>
                 <p>{player.height_feet}' {player.height_inches}"</p>
                 {generateSeasonTable(player.season_data)}
+              </div>
+            ))}
+          </ul>
+
+          <ul className={styles.articles}>
+            {articles.map((article, i) => (
+              <div key={i} className={styles.articleCard}>
+                <a href={article.url} className={styles.boldedName}>{article.title}</a>
+                <p>{article.source}</p>
               </div>
             ))}
           </ul>
