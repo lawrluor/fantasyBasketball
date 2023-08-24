@@ -124,7 +124,12 @@ export default function Start() {
       </Head>
 
       <main className={styles.container}>
-        <div>
+        <div className={styles.backgroundContainer}>
+          <h2 className={styles.secondaryHeading}>Fantasy Points Predictor</h2>
+          <p>This is a website.</p>
+        </div>
+
+        <div className={styles.playersContainer}>
           <h2 className={styles.secondaryHeading}>Player Lookup</h2>
           <input
             type="text"
@@ -133,7 +138,7 @@ export default function Start() {
             onChange={event => getPlayers(event.target.value) }
           />
 
-          <ul className={styles.players}>
+          <div className={styles.players}>
             {results.map((player, i) => (
               <div key={i} className={styles.playerCard}>
                 <p className={styles.boldedName}>{player.first_name} {player.last_name}</p>
@@ -142,16 +147,20 @@ export default function Start() {
                 {generateSeasonTable(player.season_data)}
               </div>
             ))}
-          </ul>
+          </div>
+        </div>
 
-          <ul className={styles.articles}>
+        <div className={styles.articlesContainer}>
+          <h2 className={styles.secondaryHeading}>NBA News</h2>
+          
+          <div className={styles.articles}>
             {articles.map((article, i) => (
               <div key={i} className={styles.articleCard}>
-                <a href={article.url} className={styles.boldedName}>{article.title}</a>
+                <a href={article.url} className={styles.boldedName} target="_blank" rel="noreferrer noopener">{article.title}</a>
                 <p>{article.source}</p>
               </div>
             ))}
-          </ul>
+          </div>
         </div>
       </main>
     </div>

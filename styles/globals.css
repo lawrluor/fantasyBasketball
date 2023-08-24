@@ -8,8 +8,12 @@ body {
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+  color: orange;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #ff7300;
 }
 
 * {
