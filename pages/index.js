@@ -1,6 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
-import { getArticles } from '../nbaApi';
+import { getArticles } from '../nbaAPI';
 
 import styles from '../styles/Home.module.css';
 
